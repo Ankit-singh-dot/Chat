@@ -7,7 +7,7 @@ dotenv.config();
 const port = process.env.PORT;
 const app = express();
 connectDb().then(() => {
-  console.log("DB connected successfully");
+//   console.log("DB connected successfully");
   app.listen(port, () => {
     console.log(`server is running on the ${port} `);
   });
