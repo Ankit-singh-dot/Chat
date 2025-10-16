@@ -17,30 +17,44 @@ transporter.verify((error, success) => {
 });
 export const sendOtpToEmail = async (email, otp) => {
   const html = `
-    <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-      <h2 style="color: #075e54;">🔐 WhatsApp Web Verification</h2>
-      
-      <p>Hi there,</p>
-      
-      <p>Your one-time password (OTP) to verify your WhatsApp Web account is:</p>
-      
-      <h1 style="background: #e0f7fa; color: #000; padding: 10px 20px; display: inline-block; border-radius: 5px; letter-spacing: 2px;">
+   <div style="font-family: 'Segoe UI', Roboto, Arial, sans-serif; color: #222; line-height: 1.7; background-color: #f9f9f9; padding: 20px; border-radius: 10px;">
+  <div style="max-width: 600px; margin: auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+    
+    <h2 style="color: #075e54; margin-bottom: 10px;">🔐 WhatsApp Web Verification</h2>
+    
+    <p style="font-size: 15px;">Hey there 👋,</p>
+
+    <p style="font-size: 15px;">
+      Here’s your one-time password (OTP) to verify your <strong>WhatsApp Web</strong> account.
+    </p>
+
+    <div style="margin: 25px 0; text-align: center;">
+      <h1 style="background: linear-gradient(135deg, #25d366, #128c7e); color: #fff; display: inline-block; padding: 14px 32px; border-radius: 10px; letter-spacing: 3px; font-size: 26px;">
         ${otp}
       </h1>
-
-      <p><strong>This OTP is valid for the next 5 minutes.</strong> Please do not share this code with anyone.</p>
-
-      <p>If you didn’t request this OTP, please ignore this email.</p>
-
-      <p style="margin-top: 20px;">Thanks & Regards,<br/>WhatsApp Web Security Team</p>
-
-      <hr style="margin: 30px 0;" />
-
-      <small style="color: #777;">This is an automated message. Please do not reply.</small>
     </div>
+
+    <p style="font-size: 15px; color: #333;">
+      ⏰ <strong>Valid for the next 5 minutes.</strong><br/>
+      Keep this code private and do not share it with anyone for your security.
+    </p>
+
+    <p style="font-size: 14px; color: #555;">
+      If you didn’t request this verification, you can safely ignore this message.
+    </p>
+
+    <p style="margin-top: 25px; font-size: 15px;">Best regards,<br/><strong>WhatsApp Web Security Team</strong></p>
+
+    <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
+
+    <small style="color: #888; font-size: 12px;">
+      This is an automated message. Please do not reply.
+    </small>
+  </div>
+</div>
   `;
   await transporter.sendMail({
-    from: `WhatsApp-web < ${(process.env, EMAIL_USER)}`,
+    from: `WhatsApp-web < ${(process.env.EMAIL_USER)}`,
     to: email,
     subject: `OTP Dropped. Slide in Before It's Gone 💨`,
     html,
