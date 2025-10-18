@@ -90,7 +90,7 @@ export const verifyOtp = async (req, res) => {
     return response(res, 500, "internal server error ");
   }
 };
-export const updateProfile = async (req, res) => {
+export const updateProfile = async (req,res) => {
   const { userName, agreed, about } = req.body;
   const userId = req.file;
 
@@ -108,7 +108,7 @@ export const updateProfile = async (req, res) => {
     if (agreed) user.agreed = agreed;
     if (about) user.about = about;
     await user.save();
-    return response(req, 200, "user profile updated successfully ");
+    return response(res, 200, "user profile updated successfully ");
   } catch (error) {
     console.error(error);
     return response(res, 500, "internal server error ");
@@ -116,8 +116,24 @@ export const updateProfile = async (req, res) => {
 };
 export const logout = (req, res) => {
   try {
-    req.cookie("auth_token", "", { expires: new Date(0) });
+    res.cookie("auth_token", "", { expires: new Date(0) });
     return response(res, 500, "user logout successfully");
+  } catch (error) {
+    console.error(error);
+    return response(res, 500, "internal server error ");
+  }
+};
+export const checkAuthenticated = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    if (!userId) {
+      return response(res, 404, "unauthorized ! please login before access ");
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      return response(res, 404, "user not found");
+    }
+    return response(res, 200, "allowed to use app");
   } catch (error) {
     console.error(error);
     return response(res, 500, "internal server error ");

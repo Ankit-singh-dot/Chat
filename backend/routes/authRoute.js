@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  checkAuthenticated,
   logout,
   sendOtp,
   updateProfile,
@@ -10,6 +11,9 @@ import { multerMiddleware } from "../config/cloudnaryConfig.js";
 const router = express.Router();
 router.post("/send-otp", sendOtp);
 router.post("/verify-otp", verifyOtp);
+router.get("/logout", logout);
+
+// protected route
 router.put("/update-profile", authMiddleware, multerMiddleware, updateProfile);
-router.get("logout", logout);
+router.get("/check-auth", authMiddleware, multerMiddleware, checkAuthenticated);
 export default router;
