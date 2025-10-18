@@ -6,6 +6,7 @@ import { sendOtpToEmail } from "../services/emailServices.js";
 import { sendOtpToPhoneNumber } from "../services/twilioServices.js";
 import { verifyotp } from "../services/twilioServices.js";
 import { generateToken } from "../utils/generateToken.js";
+import { uploadFileToCloudinary } from "../config/cloudnaryConfig.js";
 export const sendOtp = async (req, res) => {
   const { phoneNumber, phoneSuffix, email } = req.body;
   const otp = otpGenerate();
@@ -88,4 +89,25 @@ export const verifyOtp = async (req, res) => {
     console.error(error);
     return response(res, 500, "internal server error ");
   }
+};
+export const updateProfile = async (req, res) => {
+  const { userName, agreed, about } = req.body;
+  const userId = req.file;
+
+  try {
+    const user = await User.findOne(userId);
+    const file = req.file;
+    if (file) {
+      const uploadResult = await uploadFileToCloudinary(file);
+      user.profilePicture = updateProfile?.secure_url;
+      console.log(uploadResult);
+    } else if (req.body.profilePicture) {
+      user.profilePicture = req.body.profilePicture;
+    }
+    if (userName) user.userName = userName;
+    if (agreed) user.agreed = agreed;
+    if (about) user.about = about;
+    await user.save();
+    return response(req, 200, "user profile updated successfully ");
+  } catch (error) {}
 };
