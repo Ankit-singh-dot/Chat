@@ -1,6 +1,7 @@
 import express from "express";
 import {
   checkAuthenticated,
+  getAllUser,
   logout,
   sendOtp,
   updateProfile,
@@ -16,4 +17,5 @@ router.get("/logout", logout);
 // protected route
 router.put("/update-profile", authMiddleware, multerMiddleware, updateProfile);
 router.get("/check-auth", authMiddleware, multerMiddleware, checkAuthenticated);
+router.get("/users",authMiddleware,getAllUser)
 export default router;

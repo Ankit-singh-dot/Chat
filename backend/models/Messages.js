@@ -30,10 +30,11 @@ const MessageSchema = mongoose.Schema(
     ],
     messageStatus: {
       type: String,
-      default: send,
+      enum: ["sent", "delivered", "read"],
+      default: "send",
     },
   },
-  { timestamp: true }
+  { timestamps: true }
 );
 const Message = mongoose.model("Message", MessageSchema);
 export default Message;

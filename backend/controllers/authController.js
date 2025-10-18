@@ -7,6 +7,7 @@ import { sendOtpToPhoneNumber } from "../services/twilioServices.js";
 import { verifyotp } from "../services/twilioServices.js";
 import { generateToken } from "../utils/generateToken.js";
 import { uploadFileToCloudinary } from "../config/cloudnaryConfig.js";
+import Conversation from "../models/Conversation.js";
 export const sendOtp = async (req, res) => {
   const { phoneNumber, phoneSuffix, email } = req.body;
   const otp = otpGenerate();
@@ -90,7 +91,7 @@ export const verifyOtp = async (req, res) => {
     return response(res, 500, "internal server error ");
   }
 };
-export const updateProfile = async (req,res) => {
+export const updateProfile = async (req, res) => {
   const { userName, agreed, about } = req.body;
   const userId = req.file;
 
@@ -137,5 +138,42 @@ export const checkAuthenticated = async (req, res) => {
   } catch (error) {
     console.error(error);
     return response(res, 500, "internal server error ");
+  }
+};
+
+export const getAllUser = async (req, res) => {
+  const loggedUser = req.user.userId;
+  try {
+    const user = await User.find({ _id: { $ne: loggedUser } })
+      .select(
+        "userName profilePicture lastSeen isOnline about phoneNumber phoneSuffix"
+      )
+      .lean();
+    // console.log(user);
+    const userWithConversation = await Promise.all(
+      user.map(async (user) => {
+        const conversation = await Conversation.findOne({
+          participants: { $all: [loggedUser, user?._id] },
+        })
+          .populate({
+            path: "lastMessage",
+            select: "content createdAt sender ",
+          })
+          .lean();
+        return {
+          ...user,
+          conversation: conversation | null,
+        };
+      })
+    );
+    // console.log(userWithConversation);
+    return response(
+      res,
+      200,
+      "user fetched successfully",
+      userWithConversation
+    );
+  } catch (error) {
+    console.error(error);
   }
 };
