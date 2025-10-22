@@ -114,3 +114,24 @@ export const getMessages = async (req, res) => {
     return response(res, 500, "internal server error");
   }
 };
+export const markAsRead = async (req, res) => {
+  const { messageIds } = req.body;
+  const userId = req.user.userId;
+  try {
+    let message = await Message.find({
+      _id: { $in: messageIds },
+      receiver: userId,
+    });
+    await Message.updateMany(
+      {
+        _id: { $in: messageIds },
+        receive: userId,
+      },
+      { $set: { messageStatus: "read" } }
+    );
+    return response(res, 200, "Messages marked as read", message);
+  } catch (error) {
+    console.error(error);
+    return response(res, 500, "internal server error");
+  }
+};
