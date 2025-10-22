@@ -59,3 +59,26 @@ export const sendMessage = async () => {
     return response(res, 500, "internal server error");
   }
 };
+
+export const getConversation = async (req, res) => {
+  try {
+    const { senderId, receiverId } = req.body;
+    const userId = [senderId, receiverId].sort();
+    let conversation = Conversation.find({
+      participants: userId,
+    })
+      .populate("participant", "userName profilePicture lastSeen, isOnline")
+      .populate({
+        path: "lastMessage",
+        populate: {
+          path: "sender receiver",
+          select: "userName , profilePicture",
+        },
+      })
+      .sort({ updatedAt: -1 });
+    return response(res, 201, "Conversation get successfully", conversation);
+  } catch (error) {
+    console.error(error);
+    return response(res, 500, "internal server error");
+  }
+};
