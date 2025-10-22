@@ -2,7 +2,7 @@ import { uploadFileToCloudinary } from "../config/cloudnaryConfig";
 import Conversation from "../models/Conversation";
 import response from "../utils/responseHandler";
 import Message from "../models/Messages";
-import { set } from "mongoose";
+
 export const sendMessage = async () => {
   try {
     const { senderId, receiverId, content, messageStatus } = req.body;
@@ -135,3 +135,22 @@ export const markAsRead = async (req, res) => {
     return response(res, 500, "internal server error");
   }
 };
+export const deleteMessage = async (req, res) => {
+  const { messageId } = req.body;
+  const userId = req.user.userId;
+  try {
+    const message = await Message.findById(messageId);
+    if (!message) {
+      return response(res, 404, "messages not found");
+    }
+    if (message.sender.toString() == !userId) {
+      return response(res, 403, "Not authorized to delete this message");
+    }
+    await message.deleteOne();
+    return response(res, 201, "Message deleted successfully");
+  } catch (error) {
+    console.error(error);
+    return response(res, 500, "internal server error");
+  }
+};
+// 3:24
