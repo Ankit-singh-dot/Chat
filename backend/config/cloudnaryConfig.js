@@ -26,4 +26,4 @@ export const uploadFileToCloudinary = (file) => {
     });
   });
 };
-export const multerMiddleware = multer({ dest: "uploads" }).single("media");
+export const multerMiddleware = multer({ dest: "uploads/" }).single("media");

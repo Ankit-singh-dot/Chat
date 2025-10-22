@@ -1,0 +1,61 @@
+import { uploadFileToCloudinary } from "../config/cloudnaryConfig";
+import Conversation from "../models/Conversation";
+import response from "../utils/responseHandler";
+import Message from "../models/Messages";
+export const sendMessage = async () => {
+  try {
+    const { senderId, receiverId, content, messageStatus } = req.body;
+    const file = req.file;
+    const participants = [senderId, receiverId].sort();
+    let conversation = Conversation.findOne({
+      participants: participants,
+    });
+    if (!conversation) {
+      conversation = new Conversation({
+        participants,
+      });
+      await conversation.save();
+    }
+    let imageORVideoUrl = null;
+    let contentType = null;
+    if (file) {
+      const uploadFile = await uploadFileToCloudinary(file);
+      if (!uploadFile.secure_url) {
+        return response(res, 400, "failed to upload media");
+      }
+      imageORVideoUrl = uploadFile?.secure_url;
+      if (file.mimetype.startWith("image")) {
+        contentType = "image";
+      } else if (file.mimetype.startWith("video")) {
+        contentType = "video";
+      } else {
+        return response(res, 400, "unsupported file type");
+      }
+    } else if (content?.trim()) {
+      contentType = "text";
+    } else {
+      return response(res, 400, "Message content is required");
+    }
+    const message = new Message({
+      conversation: conversation?._id,
+      sender: senderId,
+      receiverId: receiverId,
+      content,
+      imageORVideoUrl,
+      messageStatus,
+    });
+    await message.save();
+    if (message?.contentType) {
+      conversation.lastMessage = message?._id;
+    }
+    conversation.unreadCount += 1;
+    await conversation.save();
+    const populateMessage = await Message.findOne(message?._id)
+      .populate("sender", "userName profilePicture")
+      .populate("receiver", "userName profilePicture");
+    return response(res, 201, "Message send successfully", populateMessage);
+  } catch (error) {
+    console.error(error);
+    return response(res, 500, "internal server error");
+  }
+};
