@@ -2,6 +2,7 @@ import { uploadFileToCloudinary } from "../config/cloudnaryConfig";
 import Conversation from "../models/Conversation";
 import response from "../utils/responseHandler";
 import Message from "../models/Messages";
+import { set } from "mongoose";
 export const sendMessage = async () => {
   try {
     const { senderId, receiverId, content, messageStatus } = req.body;
@@ -77,6 +78,37 @@ export const getConversation = async (req, res) => {
       })
       .sort({ updatedAt: -1 });
     return response(res, 201, "Conversation get successfully", conversation);
+  } catch (error) {
+    console.error(error);
+    return response(res, 500, "internal server error");
+  }
+};
+
+export const getMessages = async (req, res) => {
+  const { conversationId } = req.params;
+  try {
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation) {
+      return response(res, 201, "Conversation not found ");
+    }
+    if (!conversation.participants.includes(userId)) {
+      return response(req, 403, "not authorized to view this convo ");
+    }
+    const message = await Message.find({ conversation: conversationId })
+      .populate("sender", "userName profilePicture")
+      .populate("receiver", "userName profilePicture")
+      .sort("createdAt");
+    await Message.updateMany(
+      {
+        conversation: conversationId,
+        receiver: userId,
+        messageStatus: { $in: ["send", "delivered"] },
+      },
+      { $set: { messageStatus: "read" } }
+    );
+    conversation.unreadCount = 0;
+    await conversation.save();
+    return response(res, 201, "Message fetched", message);
   } catch (error) {
     console.error(error);
     return response(res, 500, "internal server error");
