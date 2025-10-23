@@ -69,9 +69,29 @@ export const viewStatus = async (req, res) => {
       },
       { new: true }
     )
+      // $addToSet => if something is already added in array it will nor re-render this same as (!status.viewers.includes(userId))
       .populate("user", "userName profilePicture")
       .populate("viewers", "userName profilePicture");
     return response(res, 201, "Status fetched successfully", updatedStatus);
+  } catch (error) {
+    console.error(error);
+    return response(res, 500, "internal server error");
+  }
+};
+
+export const deleteStatus = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { statusId } = req.params;
+    const status = await Status.findById(statusId);
+    if (!status) {
+      return response(res, 404, "Status not found");
+    }
+    if (status.user.toString() !== userId) {
+      return response(res, 403, "You can only delete your own status");
+    }
+    await Status.findByIdAndDelete(statusId);
+    return response(res, 200, "Status deleted successfully");
   } catch (error) {
     console.error(error);
     return response(res, 500, "internal server error");
