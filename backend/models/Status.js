@@ -8,8 +8,8 @@ const statusSchema = mongoose.Schema(
       enum: ["image", "text", "video"],
       default: "text",
     },
-    viewers: { type: mongoose.Schema.ObjectId, ref: "User" },
-    expiredAt: { type: date, required: true },
+    viewers: [{ type: mongoose.Schema.ObjectId, ref: "User", default: [] }],
+    expiredAt: { type: Date, required: true },
   },
   { timestamps: true }
 );

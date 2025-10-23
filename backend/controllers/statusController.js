@@ -42,3 +42,17 @@ export const createStatus = async (req, res) => {
     return response(res, 500, "internal server error");
   }
 };
+export const getStatuses = async (req, res) => {
+  try {
+    const statuses = await Status.find({
+      expiredAt: { $gt: new Date() },
+    })
+      .populate("user", "userName profilePicture")
+      .populate("viewer", "userName profilePicture")
+      .sort({ createdAt: -1 });
+    return response(res, 201, "Status fetched successfully", statuses);
+  } catch (error) {
+    console.error(error);
+    return response(res, 500, "internal server error");
+  }
+};
