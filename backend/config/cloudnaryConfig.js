@@ -10,7 +10,7 @@ cloudinary.config({
 });
 export const uploadFileToCloudinary = (file) => {
   const options = {
-    resources_type: file.mimetype.startWith("video") ? "video" : "image",
+    resources_type: file.mimetype.startsWith("video") ? "video" : "image",
   };
   return new Promise((resolve, reject) => {
     const uploader = file.mimetype.startWith("video")
