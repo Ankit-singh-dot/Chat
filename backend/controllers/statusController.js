@@ -34,7 +34,7 @@ export const createStatus = async (req, res) => {
       await status.save();
       const populateStatus = await Status.findOne(status?._id)
         .populate("user", "userName profilePicture")
-        .populate("viewer", "userName profilePicture");
+        .populate("viewers", "userName profilePicture");
       return response(res, 201, "Status created successfully", populateStatus);
     }
   } catch (error) {
@@ -48,9 +48,30 @@ export const getStatuses = async (req, res) => {
       expiredAt: { $gt: new Date() },
     })
       .populate("user", "userName profilePicture")
-      .populate("viewer", "userName profilePicture")
+      .populate("viewers", "userName profilePicture")
       .sort({ createdAt: -1 });
+    // createdAt: -1 means latest first
+    // createdAt: 1 means ascending order (oldest first).
     return response(res, 201, "Status fetched successfully", statuses);
+  } catch (error) {
+    console.error(error);
+    return response(res, 500, "internal server error");
+  }
+};
+export const viewStatus = async (req, res) => {
+  const { statusId } = req.params;
+  const userId = req.user.userId;
+  try {
+    const updatedStatus = await Status.findByIdAndUpdate(
+      statusId,
+      {
+        $addToSet: { viewers: userId },
+      },
+      { new: true }
+    )
+      .populate("user", "userName profilePicture")
+      .populate("viewers", "userName profilePicture");
+    return response(res, 201, "Status fetched successfully", updatedStatus);
   } catch (error) {
     console.error(error);
     return response(res, 500, "internal server error");
