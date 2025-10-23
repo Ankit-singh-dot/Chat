@@ -1,7 +1,7 @@
-import { uploadFileToCloudinary } from "../config/cloudnaryConfig";
-import Conversation from "../models/Conversation";
-import response from "../utils/responseHandler";
-import Message from "../models/Messages";
+import { uploadFileToCloudinary } from "../config/cloudnaryConfig.js";
+import Conversation from "../models/Conversation.js";
+import response from "../utils/responseHandler.js";
+import Message from "../models/Messages.js";
 
 export const sendMessage = async () => {
   try {
