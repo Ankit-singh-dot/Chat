@@ -3,12 +3,12 @@ import Conversation from "../models/Conversation.js";
 import response from "../utils/responseHandler.js";
 import Message from "../models/Messages.js";
 
-export const sendMessage = async () => {
+export const sendMessage = async (req, res) => {
   try {
     const { senderId, receiverId, content, messageStatus } = req.body;
     const file = req.file;
     const participants = [senderId, receiverId].sort();
-    let conversation = Conversation.findOne({
+    let conversation = await Conversation.findOne({
       participants: participants,
     });
     if (!conversation) {
@@ -25,9 +25,9 @@ export const sendMessage = async () => {
         return response(res, 400, "failed to upload media");
       }
       imageORVideoUrl = uploadFile?.secure_url;
-      if (file.mimetype.startWith("image")) {
+      if (file.mimetype.startsWith("image")) {
         contentType = "image";
-      } else if (file.mimetype.startWith("video")) {
+      } else if (file.mimetype.startsWith("video")) {
         contentType = "video";
       } else {
         return response(res, 400, "unsupported file type");
@@ -40,15 +40,17 @@ export const sendMessage = async () => {
     const message = new Message({
       conversation: conversation?._id,
       sender: senderId,
-      receiverId: receiverId,
+      receiver: receiverId,
       content,
       imageORVideoUrl,
       messageStatus,
+      contentType,
     });
     await message.save();
     if (message?.contentType) {
       conversation.lastMessage = message?._id;
     }
+    // conversation.lastMessage = message._id;
     conversation.unreadCount += 1;
     await conversation.save();
     const populateMessage = await Message.findOne(message?._id)
@@ -63,20 +65,21 @@ export const sendMessage = async () => {
 
 export const getConversation = async (req, res) => {
   try {
-    const { senderId, receiverId } = req.body;
-    const userId = [senderId, receiverId].sort();
-    let conversation = Conversation.find({
+    const userId = req.user.userId;
+    let conversation = await Conversation.find({
       participants: userId,
     })
-      .populate("participant", "userName profilePicture lastSeen, isOnline")
+      .populate("participants", "userName profilePicture lastSeen isOnline")
       .populate({
         path: "lastMessage",
         populate: {
           path: "sender receiver",
-          select: "userName , profilePicture",
+          select: "userName  profilePicture",
         },
       })
       .sort({ updatedAt: -1 });
+    // .lean();
+
     return response(res, 201, "Conversation get successfully", conversation);
   } catch (error) {
     console.error(error);
@@ -86,6 +89,7 @@ export const getConversation = async (req, res) => {
 
 export const getMessages = async (req, res) => {
   const { conversationId } = req.params;
+  const userId = req.user.userId;
   try {
     const conversation = await Conversation.findById(conversationId);
     if (!conversation) {
@@ -136,7 +140,7 @@ export const markAsRead = async (req, res) => {
   }
 };
 export const deleteMessage = async (req, res) => {
-  const { messageId } = req.body;
+  const { messageId } = req.params;
   const userId = req.user.userId;
   try {
     const message = await Message.findById(messageId);

@@ -2,6 +2,7 @@ import express from "express";
 import { multerMiddleware } from "../config/cloudnaryConfig.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import {
+  deleteMessage,
   getConversation,
   getMessages,
   markAsRead,
@@ -17,6 +18,6 @@ router.get(
   getMessages
 );
 router.put("/messages/read", authMiddleware, markAsRead);
-router.put("/messages/:messageId", authMiddleware, markAsRead);
+router.put("/messages/:messageId", authMiddleware, deleteMessage);
 
 export default router;

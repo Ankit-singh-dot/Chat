@@ -11,6 +11,11 @@ const MessageSchema = mongoose.Schema(
       ref: "User",
       required: true,
     },
+    receiver: {
+      type: mongoose.Schema.ObjectId,
+      ref: "User",
+      required: true,
+    },
     content: {
       type: String,
     },
@@ -31,7 +36,7 @@ const MessageSchema = mongoose.Schema(
     messageStatus: {
       type: String,
       enum: ["sent", "delivered", "read"],
-      default: "send",
+      default: "sent",
     },
   },
   { timestamps: true }

@@ -93,14 +93,14 @@ export const verifyOtp = async (req, res) => {
 };
 export const updateProfile = async (req, res) => {
   const { userName, agreed, about } = req.body;
-  const userId = req.file;
+  const userId = req.user.userId;
 
   try {
-    const user = await User.findOne(userId);
+    const user = await User.findById(userId);
     const file = req.file;
     if (file) {
       const uploadResult = await uploadFileToCloudinary(file);
-      user.profilePicture = updateProfile?.secure_url;
+      user.profilePicture = uploadResult?.secure_url;
       console.log(uploadResult);
     } else if (req.body.profilePicture) {
       user.profilePicture = req.body.profilePicture;
