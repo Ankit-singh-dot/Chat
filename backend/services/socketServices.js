@@ -1,10 +1,10 @@
 import { Server, Socket } from "socket.io";
-import User from "../models/User";
-import Message from "../models/Messages";
+import User from "../models/User.js";
+import Message from "../models/Messages.js";
 
 const onlineUser = new Map();
 const typingUsers = new Map();
-const initializeSocket = (server) => {
+export const initializeSocket = (server) => {
   const io = new Server(server, {
     cors: {
       origin: process.env.FRONTEND_URL,
@@ -181,5 +181,39 @@ const initializeSocket = (server) => {
         }
       }
     );
+    const handleDisconnect = async () => {
+      if (!userId) return;
+
+      try {
+        onlineUser.delete(userId);
+
+        if (typingUsers.has(userId)) {
+          const userTyping = typingUsers.get(userId);
+          Object.keys(userTyping).forEach((key) => {
+            if (key.endsWith("_timeout")) clearTimeout(userTyping[key]);
+          });
+          typingUsers.delete(userId);
+        }
+        await User.findByIdAndUpdate(userId, {
+          isOnline: false,
+          lastSeen: new Date(),
+        });
+        io.emit("user_status"),
+          {
+            userId,
+            isOnline: false,
+            lastSeen: new Date(),
+          };
+        socket.leave(userId);
+        console.log(`user ${userId} disconnected`);
+      } catch (error) {
+        console.error("error handling disconnection ", error);
+      }
+    };
+    socket.on("disconnect", handleDisconnect);
   });
+  //   attach the onlineUserMap to socket for external use
+  io.socketUserMap = onlineUser;
+  return io;
 };
+
