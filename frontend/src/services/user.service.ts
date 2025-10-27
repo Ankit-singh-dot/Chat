@@ -73,3 +73,21 @@ export const checkUserAuth = async () => {
     throw error.response ? error.response.data : error.message;
   }
 };
+
+export const logoutUser = async () => {
+  try {
+    const response = await axiosInstance.get("/auth/logout");
+    return response.data;
+  } catch (error: any) {
+    throw error.response ? error.response.data : error.message;
+  }
+};
+
+export const getAlluser = async () => {
+  try {
+    const response = await axiosInstance.get("/auth/users");
+    return response.data;
+  } catch (error: any) {
+    throw error.response ? error.response.data : error.message;
+  }
+};
