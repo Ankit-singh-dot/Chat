@@ -36,6 +36,15 @@ export const createStatus = async (req, res) => {
       const populateStatus = await Status.findOne(status?._id)
         .populate("user", "userName profilePicture")
         .populate("viewers", "userName profilePicture");
+      // emit socket event
+      if (req.io && req.socketUserMap) {
+        // broadcasting msg to other except the user which one is broadcasting the message
+        for (const [connectingUserId, socketId] of req.socketUserMap) {
+          if (connectingUserId !== userId) {
+            req.io.to(socketId).emit("new_status", populateStatus);
+          }
+        }
+      }
       return response(res, 201, "Status created successfully", populateStatus);
     }
   } catch (error) {
@@ -63,6 +72,10 @@ export const viewStatus = async (req, res) => {
   const { statusId } = req.params;
   const userId = req.user.userId;
   try {
+    const status = await Status.findById(statusId);
+    if (!status) {
+      return response(res, 404, "status not found");
+    }
     const updatedStatus = await Status.findByIdAndUpdate(
       statusId,
       {
@@ -70,10 +83,22 @@ export const viewStatus = async (req, res) => {
       },
       { new: true }
     )
-      // $addToSet => if something is already added in array it will nor re-render this same as (!status.viewers.includes(userId))
       .populate("user", "userName profilePicture")
       .populate("viewers", "userName profilePicture");
-    return response(res, 201, "Status fetched successfully", updatedStatus);
+
+    if (req.io && req.socketUserMap) {
+      const statusOwnerSocketId = req.socketUserMap.get(status.user.toString());
+      if (statusOwnerSocketId) {
+        const viewData = {
+          statusId,
+          viewerId: userId,
+          totalViewers: updatedStatus.viewers.length,
+          viewers: updatedStatus.viewers,
+        };
+        req.io.to(statusOwnerSocketId).emit("status_viewed", viewData);
+      }
+    }
+    return response(res, 200, "Status fetched successfully", updatedStatus);
   } catch (error) {
     console.error(error);
     return response(res, 500, "internal server error");
