@@ -1,16 +1,15 @@
-
-
+import React from "react";
+import { Routes, Route, BrowserRouter as Router } from "react-router-dom";
+import Login from "./pages/Login";
 
 function App() {
-
-
   return (
-    <>
-    <div>
-      <h1 className='text-zinc-200 text-4xl'>hello</h1>
-    </div>
-    </>
-  )
+    <Router>
+      <Routes>
+        <Route path="/user-login" element={<Login />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
