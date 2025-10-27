@@ -26,5 +26,8 @@
     "nodemon": "^3.1.10",
     "socket.io": "^4.8.1",
     "twilio": "^5.10.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.1"
   }
 }
