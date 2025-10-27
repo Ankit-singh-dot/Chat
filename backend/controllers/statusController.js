@@ -1,6 +1,6 @@
-import { uploadFileToCloudinary } from "../config/cloudnaryConfig";
-import Status from "../models/Status";
-import response from "../utils/responseHandler";
+import { uploadFileToCloudinary } from "../config/cloudnaryConfig.js";
+import Status from "../models/Status.js";
+import response from "../utils/responseHandler.js";
 
 export const createStatus = async (req, res) => {
   try {
@@ -30,6 +30,7 @@ export const createStatus = async (req, res) => {
         user: userId,
         content: mediaUrl || content,
         contentType: finalContentType,
+        expireAt,
       });
       await status.save();
       const populateStatus = await Status.findOne(status?._id)
@@ -98,4 +99,4 @@ export const deleteStatus = async (req, res) => {
   }
 };
 
-// 3:52 
+// 3:52

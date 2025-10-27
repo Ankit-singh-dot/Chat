@@ -6,7 +6,8 @@ import connectDb from "./config/dbConnect.js";
 import bodyParser from "body-parser";
 import authRoute from "./routes/authRoute.js";
 import chatRoute from "./routes/chatRoute.js";
-import {initializeSocket} from "./services/socketServices.js";
+import statusRouter from "./routes/statusRoutes.js";
+import { initializeSocket } from "./services/socketServices.js";
 import http from "node:http";
 dotenv.config();
 const port = process.env.PORT;
@@ -24,6 +25,7 @@ app.use(cors(corsOption));
 // server
 const server = http.createServer(app);
 const io = initializeSocket(server);
+// socket middleware before routes
 app.use((req, res, next) => {
   req.io = io;
   req.socketUserMap = io.socketUserMap;
@@ -33,6 +35,7 @@ app.use((req, res, next) => {
 // routes
 app.use("/api/auth", authRoute);
 app.use("/api/chat", chatRoute);
+app.use("api/status", statusRouter);
 connectDb()
   .then(() => {
     //   console.log("DB connected successfully");
