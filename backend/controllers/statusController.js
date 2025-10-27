@@ -117,6 +117,13 @@ export const deleteStatus = async (req, res) => {
       return response(res, 403, "You can only delete your own status");
     }
     await Status.findByIdAndDelete(statusId);
+    if (req.io && req.socketUserMap) {
+      for (const [connectingUserId, socketId] of req.socketUserMap) {
+        if (connectingUserId !== userId) {
+          req.io.to(socketId).emit("status_deleted", statusId);
+        }
+      }
+    }
     return response(res, 200, "Status deleted successfully");
   } catch (error) {
     console.error(error);
