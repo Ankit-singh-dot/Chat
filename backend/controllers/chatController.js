@@ -56,6 +56,14 @@ export const sendMessage = async (req, res) => {
     const populateMessage = await Message.findOne(message?._id)
       .populate("sender", "userName profilePicture")
       .populate("receiver", "userName profilePicture");
+    if (req.io && req.socketUserMap) {
+      const receiverSocketId = req.socketUserMap.get(receiverId);
+      if (receiverSocketId) {
+        req.io.to(receiverSocketId).emit("receive_message", populateMessage);
+        message.messageStatus = "delivered";
+        await message.save();
+      }
+    }
     return response(res, 201, "Message send successfully", populateMessage);
   } catch (error) {
     console.error(error);
@@ -122,7 +130,7 @@ export const markAsRead = async (req, res) => {
   const { messageIds } = req.body;
   const userId = req.user.userId;
   try {
-    let message = await Message.find({
+    let messages = await Message.find({
       _id: { $in: messageIds },
       receiver: userId,
     });
@@ -133,7 +141,23 @@ export const markAsRead = async (req, res) => {
       },
       { $set: { messageStatus: "read" } }
     );
-    return response(res, 200, "Messages marked as read", message);
+
+    // notify blue tick function read only the sender
+    if (eq.io && req.socketUserMap) {
+      for (const message of messages) {
+        const senderSocketId = req.socketUserMap.get(message.sender.toString());
+        if (socketUserMap) {
+          const updatedMessage = {
+            _id: message._id,
+            messageStatus: "read",
+          };
+          req.io.to(senderSocketId).emit("message_read", updatedMessage);
+          await message.save();
+        }
+      }
+    }
+
+    return response(res, 200, "Messages marked as read", messages);
   } catch (error) {
     console.error(error);
     return response(res, 500, "internal server error");
