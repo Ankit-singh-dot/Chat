@@ -175,6 +175,15 @@ export const deleteMessage = async (req, res) => {
       return response(res, 403, "Not authorized to delete this message");
     }
     await message.deleteOne();
+
+    if (req.io && req.socketUserMap) {
+      const receiverSocketId = req.socketUserMap.get(
+        message.receiver.toString()
+      );
+      if (receiverSocketId) {
+        req.io.to(receiverSocketId).emit("messages_deleted", messageId);
+      }
+    }
     return response(res, 201, "Message deleted successfully");
   } catch (error) {
     console.error(error);
