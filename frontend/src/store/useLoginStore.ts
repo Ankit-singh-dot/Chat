@@ -1,6 +1,15 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-const useLoginStore = create(
+
+interface LoginState {
+  step: number;
+  userPhoneData: string | null;
+  setStep: (step: number) => void;
+  setUserPhoneData: (data: string) => void;
+  resetLoginState: () => void;
+}
+
+const useLoginStore = create<LoginState>()(
   persist(
     (set) => ({
       step: 1,
@@ -10,7 +19,7 @@ const useLoginStore = create(
       resetLoginState: () => set({ step: 1, userPhoneData: null }),
     }),
     {
-      name: "login-storage ",
+      name: "login-storage",
       partialize: (state) => ({
         step: state.step,
         userPhoneData: state.userPhoneData,
@@ -18,4 +27,5 @@ const useLoginStore = create(
     }
   )
 );
+
 export default useLoginStore;

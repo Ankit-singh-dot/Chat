@@ -1,18 +1,6 @@
 import axiosInstance from "./url.service";
-interface sendOtpPayLoad {
-  phoneNumber: string;
-  phoneSuffix: string;
-  email: string;
-  otp: string;
-  userName: string;
-  agreed: string;
-  about: string;
-}
-export const sendOtp = async ({
-  phoneNumber,
-  phoneSuffix,
-  email,
-}: sendOtpPayLoad) => {
+
+export const sendOtp = async (phoneNumber, phoneSuffix, email) => {
   try {
     const response = await axiosInstance.post("/auth/send-otp", {
       phoneNumber,
@@ -20,17 +8,12 @@ export const sendOtp = async ({
       email,
     });
     return response.data;
-  } catch (error: any) {
+  } catch (error) {
     throw error.response ? error.response.data : error.message;
   }
 };
 
-export const verifyOtp = async ({
-  phoneNumber,
-  phoneSuffix,
-  email,
-  otp,
-}: sendOtpPayLoad) => {
+export const verifyOtp = async (phoneNumber, phoneSuffix, email, otp) => {
   try {
     const response = await axiosInstance.post("/auth/verify-otp", {
       phoneNumber,
@@ -39,16 +22,12 @@ export const verifyOtp = async ({
       otp,
     });
     return response.data;
-  } catch (error: any) {
+  } catch (error) {
     throw error.response ? error.response.data : error.message;
   }
 };
 
-export const updateProfile = async ({
-  userName,
-  agreed,
-  about,
-}: sendOtpPayLoad) => {
+export const updateProfile = async (userName, agreed, about) => {
   try {
     const response = await axiosInstance.put("/auth/update-profile", {
       userName,
@@ -56,7 +35,7 @@ export const updateProfile = async ({
       about,
     });
     return response.data;
-  } catch (error: any) {
+  } catch (error) {
     throw error.response ? error.response.data : error.message;
   }
 };
@@ -69,7 +48,7 @@ export const checkUserAuth = async () => {
     } else if (response.data.status === "error") {
       return { isAuthenticated: false };
     }
-  } catch (error: any) {
+  } catch (error) {
     throw error.response ? error.response.data : error.message;
   }
 };
@@ -78,7 +57,7 @@ export const logoutUser = async () => {
   try {
     const response = await axiosInstance.get("/auth/logout");
     return response.data;
-  } catch (error: any) {
+  } catch (error) {
     throw error.response ? error.response.data : error.message;
   }
 };
@@ -87,7 +66,7 @@ export const getAlluser = async () => {
   try {
     const response = await axiosInstance.get("/auth/users");
     return response.data;
-  } catch (error: any) {
+  } catch (error) {
     throw error.response ? error.response.data : error.message;
   }
 };
