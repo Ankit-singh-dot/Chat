@@ -9,9 +9,7 @@ import { persist } from "zustand/middleware";
 //   resetLoginState: () => void;
 // }
 
-const useLoginStore = create(
-  persist(
-    (set) => ({
+const useLoginStore = create( persist((set) => ({
       step: 1,
       userPhoneData,
       setStep: (step) => set({ step }),
