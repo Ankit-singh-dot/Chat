@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import useThemeStore from "../store/themeStore";
 import useUserStore from "../store/useUserStore";
 import useLoginStore from "../store/useLoginStore";
-
+import { motion } from "framer-motion";
 const loginValidationSchema = yup
   .object()
   .shape({
@@ -93,25 +93,23 @@ const Login = () => {
   } = useForm({
     resolver: yupResolver(profileValidationSchema),
   });
-   const toggleTheme = () => {
-     setTheme(theme === "dark" ? "light" : "dark");
-   };
-
   return (
     <div
       className={`min-h-screen ${
         theme === "dark"
-          ? "bg-gray-900 text-white"
-          : "bg-gradient-to-br from-green-400 to-blue-500 text-black"
-      } flex flex-col items-center justify-center`}
+          ? "bg-gray-900"
+          : "bg-gradient-to-br from-green-400 to-blue-500"
+      } flex items-center justify-center p-4 overflow-hidden`}
     >
-      <h1 className="text-2xl font-bold mb-4">Current Theme: {theme}</h1>
-      <button
-        onClick={toggleTheme}
-        className="px-4 py-2 rounded-lg bg-white/30 hover:bg-white/50 transition"
-      >
-        Toggle Theme
-      </button>
+      <motion.div
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className={`${
+          theme === "dark" ? "bg-gray-800 text-white" : "bg-white"
+        } p-6 md:p-8 rounded-lg shadow-2xl  max-w-md relative z-10`}
+        // max-w-md => This box won’t grow wider than this limit even on big screens. 	Sets the maximum width of the box to a medium size
+      ></motion.div>
     </div>
   );
 };
