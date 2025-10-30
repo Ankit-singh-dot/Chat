@@ -1,19 +1,19 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-interface LoginState {
-  step: number;
-  userPhoneData: string | null;
-  setStep: (step: number) => void;
-  setUserPhoneData: (data: string) => void;
-  resetLoginState: () => void;
-}
+// interface LoginState {
+//   step: number;
+//   userPhoneData: string | null;
+//   setStep: (step: number) => void;
+//   setUserPhoneData: (data: string) => void;
+//   resetLoginState: () => void;
+// }
 
-const useLoginStore = create<LoginState>()(
+const useLoginStore = create(
   persist(
     (set) => ({
       step: 1,
-      userPhoneData: null,
+      userPhoneData,
       setStep: (step) => set({ step }),
       setUserPhoneData: (data) => set({ userPhoneData: data }),
       resetLoginState: () => set({ step: 1, userPhoneData: null }),

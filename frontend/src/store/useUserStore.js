@@ -4,7 +4,7 @@ const useUserStore = create(
   persist(
     (set) => {
       user: null;
-      isAuthenticated: null;
+      isAuthenticated: false;
       setUser: (userData) => set({ user: userData, isAuthenticated: true });
       clearUser: () => set({ userData: null, isAuthenticated: false });
     },
