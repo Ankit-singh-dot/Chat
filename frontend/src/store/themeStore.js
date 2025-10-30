@@ -2,13 +2,14 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 const useThemeStore = create(
   persist(
-    (set) => {
-      theme: "light";
-      setTheme: (theme) => set({ them });
-    },
+    (set) => ({
+      theme: "light",
+      setTheme: (theme) => set({ theme }),
+    }),
     {
       name: "theme-storage",
-      getStorage: () => localStorage,
+      getStorage: () =>
+        typeof window !== "undefined" ? localStorage : undefined,
     }
   )
 );

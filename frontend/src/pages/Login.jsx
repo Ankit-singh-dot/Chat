@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import useLoginStore from "../store/useLoginStore";
 import { yupResolver } from "@hookform/resolvers/yup";
 import countries from "../utils/countries";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
-import { useUserStore } from "../store/useUserStore";
 import { useForm } from "react-hook-form";
+import useThemeStore from "../store/themeStore";
+import useUserStore from "../store/useUserStore";
+import useLoginStore from "../store/useLoginStore";
 
 const loginValidationSchema = yup
   .object()
@@ -15,17 +16,17 @@ const loginValidationSchema = yup
       .nullable()
       .notRequired()
       .matches(/^\d+$/, "phone number must be digit ")
-      .transform((value, originalValue) => {
-        originalValue.trim() === "" ? null : value;
-      }),
+      .transform((value, originalValue) =>
+        originalValue.trim() === "" ? null : value
+      ),
     email: yup
       .string()
       .nullable()
       .notRequired()
       .email("please enter valid email")
-      .transform((value, originalValue) => {
-        originalValue.trim() === "" ? null : value;
-      }),
+      .transform((value, originalValue) =>
+        originalValue.trim() === "" ? null : value
+      ),
   })
   .test(
     "at least one ",
@@ -43,7 +44,9 @@ const otpValidationSchema = yup.object().shape({
 
 const profileValidationSchema = yup.object().shape({
   userName: yup.string().required("username is required"),
-  agreed: yup.string().oneOf([true], "You must agree to the terms & condition"),
+  agreed: yup
+    .boolean()
+    .oneOf([true], "You must agree to the terms & condition"),
 });
 
 const avatars = [
@@ -69,6 +72,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { setUser } = useUserStore();
+  const { theme, setTheme } = useThemeStore();
 
   const {
     register: loginRegister,
@@ -89,8 +93,26 @@ const Login = () => {
   } = useForm({
     resolver: yupResolver(profileValidationSchema),
   });
+   const toggleTheme = () => {
+     setTheme(theme === "dark" ? "light" : "dark");
+   };
+
   return (
-   <div></div>
+    <div
+      className={`min-h-screen ${
+        theme === "dark"
+          ? "bg-gray-900 text-white"
+          : "bg-gradient-to-br from-green-400 to-blue-500 text-black"
+      } flex flex-col items-center justify-center`}
+    >
+      <h1 className="text-2xl font-bold mb-4">Current Theme: {theme}</h1>
+      <button
+        onClick={toggleTheme}
+        className="px-4 py-2 rounded-lg bg-white/30 hover:bg-white/50 transition"
+      >
+        Toggle Theme
+      </button>
+    </div>
   );
 };
 
